@@ -12,8 +12,8 @@ runs:
       id: check
       shell: bash
       run: |
-        printf 'labeled=%s\n' "$(( "$(gh pr list --label "${gh_label}" --state open --json number | jq length)" +
-                                   "$(gh issue list --label "${gh_label}" --state open --json number | jq length)" ))" >> ${GITHUB_OUTPUT}
+        printf 'labeled=%s\n' "$(( "$(gh pr list --label "${{ inputs.gh_label }}" --state open --json number | jq length)" +
+                                   "$(gh issue list --label "${{ inputs.gh_label }}" --state open --json number | jq length)" ))" >> ${GITHUB_OUTPUT}
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -44,7 +44,7 @@ runs:
       if: ${{ failure() && steps.fetch.conclusion == 'failure' && steps.check.outputs.labeled == '0' }}
       shell: bash
       run: |
-        gh issue create --title "The Github workflow ${GITHUB_RUN_NUMBER} failed" --body "The fetch step failed. This zig option needs a fix." --label "${gh_label}" --assignee "${GITHUB_REPOSITORY_OWNER}"
+        gh issue create --title "The Github workflow ${GITHUB_RUN_NUMBER} failed" --body "The fetch step failed. This zig option needs a fix." --label "${{ inputs.gh_label }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -68,6 +68,6 @@ runs:
         git add -A
         git commit -m 'Update dependencies'
         git push --force --set-upstream origin bot
-        gh pr create --base trunk -f --label "${gh_label}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
+        gh pr create --base trunk -f --label "${{ inputs.gh_label }}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
