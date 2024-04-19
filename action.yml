@@ -31,7 +31,7 @@ runs:
       if: ${{ steps.check.outputs.labeled == '0' }}
       shell: bash
       run: |
-        sudo apt-get install -y wayland-scanner++
+        sudo apt-get install -y libwayland
 
     - name: Setup git user information
       if: ${{ steps.check.outputs.labeled == '0' }}
