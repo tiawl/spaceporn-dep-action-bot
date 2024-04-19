@@ -33,7 +33,7 @@ runs:
       run: |
         git config user.name "GitHub Actions[bot]"
         git config user.email "<>"
-        git checkout -b "${branch}" || git checkout "${branch}"
+        git checkout -b "${{ inputs.branch }}" || git checkout "${{ inputs.branch }}"
 
     - name: Fetch
       if: ${{ steps.check.outputs.labeled == '0' }}
@@ -71,7 +71,7 @@ runs:
       run: |
         git add -A
         git commit -m 'Update dependencies'
-        git push --force --set-upstream origin "${branch}"
+        git push --force --set-upstream origin "${{ inputs.branch }}"
         gh pr create --base trunk -f --label "${{ inputs.gh_label }}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
