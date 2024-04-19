@@ -31,7 +31,7 @@ runs:
       if: ${{ steps.check.outputs.labeled == '0' }}
       shell: bash
       run: |
-        snap install glab
+        sudo snap install glab
 
     - name: Setup git user information
       if: ${{ steps.check.outputs.labeled == '0' }}
