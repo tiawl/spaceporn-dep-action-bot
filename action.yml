@@ -55,6 +55,12 @@ runs:
       run: |
         printf 'len=%s\n' "$(git diff HEAD --name-only | wc -l)" >> ${GITHUB_OUTPUT}
 
+    - name: Update
+      if: ${{ steps.check.outputs.labeled == '0' && steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0' }}
+      shell: bash
+      run: |
+        zig build -Dupdate
+
     - name: Create Pull Request
       if: ${{ steps.check.outputs.labeled == '0' && steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0' }}
       shell: bash
