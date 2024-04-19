@@ -5,6 +5,10 @@ inputs:
     description: 'Label name to apply on pull requests/issues created by the bot'
     required: false
     default: 'update'
+  branch:
+    description: 'Branch name used on pull requests by the bot'
+    required: false
+    default: 'bot'
 runs:
   using: "composite"
   steps:
@@ -29,7 +33,7 @@ runs:
       run: |
         git config user.name "GitHub Actions[bot]"
         git config user.email "<>"
-        git checkout -b bot
+        git checkout -b "${branch}" || git checkout "${branch}"
 
     - name: Fetch
       if: ${{ steps.check.outputs.labeled == '0' }}
@@ -67,7 +71,7 @@ runs:
       run: |
         git add -A
         git commit -m 'Update dependencies'
-        git push --force --set-upstream origin bot
+        git push --force --set-upstream origin "${branch}"
         gh pr create --base trunk -f --label "${{ inputs.gh_label }}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
