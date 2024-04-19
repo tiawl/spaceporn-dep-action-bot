@@ -12,7 +12,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Check
+    - name: If a PR/issue is already opened by the bot, this step allows to skip the job
       id: check
       shell: bash
       run: |
@@ -26,6 +26,12 @@ runs:
       uses: goto-bus-stop/setup-zig@v2.2.0
       with:
         version: 0.12.0-dev.3630+215de3ee6
+
+    - name: Install glab
+      if: ${{ steps.check.outputs.labeled == '0' }}
+      shell: bash
+      run: |
+        snap install glab
 
     - name: Setup git user information
       if: ${{ steps.check.outputs.labeled == '0' }}
