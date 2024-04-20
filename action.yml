@@ -26,11 +26,17 @@ runs:
       with:
         version: ${{ env.zig_version }}
 
-    - name: Install packages
+    - name: Install apt packages
       if: ${{ steps.check.outputs.labeled == '0' }}
       shell: ${{ env.shell }}
       run: |
-        sudo apt-get install -y ${{ env.packages }}
+        sudo apt-get install -y ${{ env.apt_packages }}
+
+    - name: Install pip packages
+      if: ${{ steps.check.outputs.labeled == '0' }}
+      shell: ${{ env.shell }}
+      run: |
+        pip3 install ${{ env.pip_packages }}
 
     - name: Setup git user information
       if: ${{ steps.check.outputs.labeled == '0' }}
