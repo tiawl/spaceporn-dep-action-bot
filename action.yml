@@ -18,7 +18,7 @@ runs:
         printf 'labeled=%s\n' "$(( "$(gh pr list --label "${{ env.gh_label }}" --state open --json "${{ env.gh_issue_field }}" | jq length)" +
                                    "$(gh issue list --label "${{ env.gh_label }}" --state open --json "${{ env.gh_issue_field }}" | jq length)" ))" >> ${GITHUB_OUTPUT}
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}
 
     - name: Setup Zig
       if: ${{ steps.check.outputs.labeled == '0' }}
@@ -53,7 +53,7 @@ runs:
       run: |
         zig build -Dfetch
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}
 
     - name: Create Issue
       if: ${{ failure() && steps.fetch.conclusion == 'failure' && steps.check.outputs.labeled == '0' }}
@@ -61,7 +61,7 @@ runs:
       run: |
         gh issue create --title "${{ env.issue_title }}" --body "${{ env.issue_body }}" --label "${{ env.gh_label }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}
 
     - name: Diff
       if: ${{ steps.check.outputs.labeled == '0' && steps.fetch.conclusion == 'success' }}
@@ -85,4 +85,4 @@ runs:
         git push --force --set-upstream origin "${{ env.branch }}"
         gh pr create --base "${{ env.default_branch }}" --fill --label "${{ env.gh_label }}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}
