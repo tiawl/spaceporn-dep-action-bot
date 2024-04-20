@@ -1,5 +1,5 @@
 name: 'Bot'
-description: 'Fetch Dependencies (zig modules, git submodules, git clone used in build.zig) & makes a pull request for tiawl/spaceporn dependencies'
+description: 'Fetch dependencies (zig modules, git submodules, git clone used in build.zig) & makes a pull request'
 runs:
   using: "composite"
   steps:
@@ -45,6 +45,12 @@ runs:
         git config user.name "${{ env.gh_bot_name }}"
         git config user.email "${{ env.gh_bot_email }}"
         git checkout -b "${{ env.branch }}" || git checkout "${{ env.branch }}"
+
+    - name: Pull submodules
+      if: ${{ steps.check.outputs.labeled == '0' }}
+      shell: ${{ env.shell }}
+      run: |
+        git submodule update --init --recursive
 
     - name: Fetch
       if: ${{ steps.check.outputs.labeled == '0' }}
