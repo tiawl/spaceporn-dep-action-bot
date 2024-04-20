@@ -9,14 +9,14 @@ runs:
     - name: Load environment
       shell: ${{ env.shell }}
       run: |
-        yq '. | to_entries | map([.key, .value] | join ("=")) | .[]' "${GITHUB_ACTION_PATH}/env.yml" >> "${GITHUB_ENV}"
+        yq "${{ env.bash_from_yaml }}" "${GITHUB_ACTION_PATH}/env.yml" >> "${GITHUB_ENV}"
 
     - name: If a PR/issue is already opened by the bot, this step allows to skip the job
       id: check
       shell: ${{ env.shell }}
       run: |
-        printf 'labeled=%s\n' "$(( "$(gh pr list --label "${{ env.gh_label }}" --state open --json number | jq length)" +
-                                   "$(gh issue list --label "${{ env.gh_label }}" --state open --json number | jq length)" ))" >> ${GITHUB_OUTPUT}
+        printf 'labeled=%s\n' "$(( "$(gh pr list --label "${{ env.gh_label }}" --state open --json "${{ env.gh_issue_field }}" | jq length)" +
+                                   "$(gh issue list --label "${{ env.gh_label }}" --state open --json "${{ env.gh_issue_field }}" | jq length)" ))" >> ${GITHUB_OUTPUT}
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -36,8 +36,8 @@ runs:
       if: ${{ steps.check.outputs.labeled == '0' }}
       shell: ${{ env.shell }}
       run: |
-        git config user.name "GitHub Actions[bot]"
-        git config user.email "<>"
+        git config user.name "${{ env.gh_bot_name }}"
+        git config user.email "${{ env.gh_bot_email }}"
         git checkout -b "${{ env.branch }}" || git checkout "${{ env.branch }}"
 
     - name: Fetch
@@ -53,7 +53,7 @@ runs:
       if: ${{ failure() && steps.fetch.conclusion == 'failure' && steps.check.outputs.labeled == '0' }}
       shell: ${{ env.shell }}
       run: |
-        gh issue create --title "The Github workflow ${GITHUB_RUN_NUMBER} failed" --body "The fetch step failed. This zig option needs a fix." --label "${{ env.gh_label }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
+        gh issue create --title "${{ env.issue_title }}" --body "${{ env.issue_body }}" --label "${{ env.gh_label }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -75,8 +75,8 @@ runs:
       shell: ${{ env.shell }}
       run: |
         git add -A
-        git commit -m 'Update dependencies'
+        git commit -m "${{ env.pr_title }}"
         git push --force --set-upstream origin "${{ env.branch }}"
-        gh pr create --base ${{ env.default_branch }} -f --label "${{ env.gh_label }}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
+        gh pr create --base "${{ env.default_branch }}" --fill --label "${{ env.gh_label }}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
       env:
         GITHUB_TOKEN: ${{ github.token }}
