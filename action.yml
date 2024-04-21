@@ -24,8 +24,11 @@ runs:
         do
           gh issue close "${issue_nr}" --comment "${{ env.gh_bot_close_comment }}"
         done
-        [[ "$(( "$(gh pr list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq length)" +
-                "$(gh issue list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq length)" ))" != '0' ]] && exit 1
+        if [[ "$(( "$(gh pr list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq length)" +
+                   "$(gh issue list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq length)" ))" != '0' ]];
+        then
+          exit 1
+        fi
       env:
         GH_TOKEN: ${{ github.token }}
 
