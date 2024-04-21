@@ -14,18 +14,18 @@ runs:
     - name: Close every bot PRs/issues
       shell: ${{ env.shell }}
       run: |
-        declare -a pr_list=( $(gh pr list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq ".[] | .${{ env.gh_field }}") )
+        declare -a pr_list=( $(gh pr list --author '@me' --state open --json "${{ env.gh_field }}" | jq ".[] | .${{ env.gh_field }}") )
         for pr_nr in ${pr_list[@]}
         do
           gh pr close "${pr_nr}" --comment "${{ env.gh_bot_close_comment }}" --delete-branch
         done
-        declare -a issue_list=( $(gh issue list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq ".[] | .${{ env.gh_field }}") )
+        declare -a issue_list=( $(gh issue list --author '@me' --state open --json "${{ env.gh_field }}" | jq ".[] | .${{ env.gh_field }}") )
         for issue_nr in ${issue_list[@]}
         do
           gh issue close "${issue_nr}" --comment "${{ env.gh_bot_close_comment }}"
         done
-        if [[ "$(( "$(gh pr list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq length)" +
-                   "$(gh issue list --label "${{ env.gh_bot_label }}" --state open --json "${{ env.gh_field }}" | jq length)" ))" != '0' ]];
+        if [[ "$(( "$(gh pr list --author '@me' --state open --json "${{ env.gh_field }}" | jq length)" +
+                   "$(gh issue list --author '@me' --state open --json "${{ env.gh_field }}" | jq length)" ))" != '0' ]];
         then
           exit 1
         fi
@@ -71,7 +71,7 @@ runs:
       if: ${{ failure() && steps.fetch.conclusion == 'failure' }}
       shell: ${{ env.shell }}
       run: |
-        gh issue create --title "${{ env.gh_bot_issue_title }}" --body "${{ env.gh_bot_issue_body }}" --label "${{ env.gh_bot_label }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
+        gh issue create --title "${{ env.gh_bot_issue_title }}" --body "${{ env.gh_bot_issue_body }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
       env:
         GH_TOKEN: ${{ github.token }}
 
@@ -95,6 +95,6 @@ runs:
         git add -A
         git commit -m "Bot: ${{ env.gh_bot_pr_title }}"
         git push --force --set-upstream origin "${{ env.bot_branch }}"
-        gh pr create --base "${{ env.default_branch }}" --fill --label "${{ env.gh_bot_label }}" --reviewer "${GITHUB_REPOSITORY_OWNER}"
+        gh pr create --base "${{ env.default_branch }}" --fill --reviewer "${GITHUB_REPOSITORY_OWNER}"
       env:
         GH_TOKEN: ${{ github.token }}
