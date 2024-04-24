@@ -3,7 +3,6 @@ description: 'Fetch dependencies (zig modules, git submodules, git clone used in
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
     - uses: tiawl/spaceporn-dep-action-env@v1
 
     - name: Load environment

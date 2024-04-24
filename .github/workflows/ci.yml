@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - trunk
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        repo:
+          - vulkan
+          - wayland
+          - X11
+          - glfw
+          - cimgui
+          - spirv
+          - glslang
+          - shaderc
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: "${{ format ('{0}/{1}.zig', github.repository_owner, matrix.repo) }}"
+
+    - uses: tiawl/spaceporn-dep-action-bot@ci
