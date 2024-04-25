@@ -22,6 +22,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        repository: "${{ format ('{0}/{1}.zig', github.repository_owner, matrix.repo) }}"
+        repository: "${{ github.repository_owner }}/${{ matrix.repo }}.zig"
 
     - uses: tiawl/spaceporn-dep-action-bot@ci
