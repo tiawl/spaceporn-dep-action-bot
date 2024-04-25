@@ -7,6 +7,10 @@ on:
 
 jobs:
   test:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     strategy:
       matrix:
         repo:
@@ -25,3 +29,5 @@ jobs:
         repository: "${{ github.repository_owner }}/${{ matrix.repo }}.zig"
 
     - uses: tiawl/spaceporn-dep-action-bot@ci
+      with:
+        token: "${{ github.token }}"

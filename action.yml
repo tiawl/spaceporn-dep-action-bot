@@ -1,5 +1,9 @@
 name: 'Bot'
 description: 'Fetch dependencies (zig modules, git submodules, git clone used in build.zig) & makes a pull request'
+inputs:
+  token:
+    description: 'The github token'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -29,7 +33,7 @@ runs:
           exit 1
         fi
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ inputs.token }}
 
     - name: Setup Zig
       uses: goto-bus-stop/setup-zig@v2.2.0
@@ -64,7 +68,7 @@ runs:
       run: |
         zig build -Dfetch
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ inputs.token }}
 
     - name: Create Issue
       if: ${{ failure() && steps.fetch.conclusion == 'failure' }}
@@ -72,7 +76,7 @@ runs:
       run: |
         gh issue create --title "${{ env.gh_bot_issue_title }}" --body "${{ env.gh_bot_issue_body }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ inputs.token }}
 
     - name: Diff
       if: ${{ steps.fetch.conclusion == 'success' }}
@@ -96,4 +100,4 @@ runs:
         git push --force --set-upstream origin "${{ env.bot_branch }}"
         gh pr create --base "${{ env.default_branch }}" --fill --reviewer "${GITHUB_REPOSITORY_OWNER}"
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ inputs.token }}
