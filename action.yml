@@ -18,7 +18,7 @@ runs:
 
     - name: Close every bot PRs/issues
       env:
-        OPTIONS: "--author '@me' --state open --json '${{ env.gh_field }}'"
+        OPTIONS: "--author '@me' --state open --json ${{ env.gh_field }}"
         COMMENT: "--comment '${{ env.gh_bot_close_comment }}'"
         GH_TOKEN: "${{ inputs.token }}"
         FILTER: ".[] | .${{ env.gh_field }}"
