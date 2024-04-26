@@ -10,30 +10,35 @@ runs:
     - uses: tiawl/spaceporn-dep-action-env@v1
 
     - name: Load environment
+      env:
+        FILTER: '. | to_entries | map([.key, .value] | join ("=")) | .[]'
       shell: ${{ env.shell }}
       run: |
-        yq '. | to_entries | map([.key, .value] | join ("=")) | .[]' "${GITHUB_ACTION_PATH}/env.yml" >> "${GITHUB_ENV}"
+        yq "${FILTER}" "${GITHUB_ACTION_PATH}/env.yml" >> "${GITHUB_ENV}"
 
     - name: Close every bot PRs/issues
+      env:
+        OPTIONS: "--author '@me' --state open --json ${{ env.gh_field }}"
+        COMMENT: "--comment '${{ env.gh_bot_close_comment }}'"
+        GH_TOKEN: "${{ inputs.token }}"
+        FILTER: ".[] | .${{ env.gh_field }}"
       shell: ${{ env.shell }}
       run: |
-        declare -a pr_list=( $(gh pr list --author '@me' --state open --json "${{ env.gh_field }}" | jq ".[] | .${{ env.gh_field }}") )
+        declare -a pr_list=( $(gh pr list ${OPTIONS} | jq "${FILTER}") )
         for pr_nr in ${pr_list[@]}
         do
-          gh pr close "${pr_nr}" --comment "${{ env.gh_bot_close_comment }}" --delete-branch
+          gh pr close "${pr_nr}" ${COMMENT} --delete-branch
         done
-        declare -a issue_list=( $(gh issue list --author '@me' --state open --json "${{ env.gh_field }}" | jq ".[] | .${{ env.gh_field }}") )
+        declare -a issue_list=( $(gh issue list ${OPTIONS} | jq "${FILTER}") )
         for issue_nr in ${issue_list[@]}
         do
-          gh issue close "${issue_nr}" --comment "${{ env.gh_bot_close_comment }}"
+          gh issue close "${issue_nr}" ${COMMENT}
         done
-        if [[ "$(( "$(gh pr list --author '@me' --state open --json "${{ env.gh_field }}" | jq length)" +
-                   "$(gh issue list --author '@me' --state open --json "${{ env.gh_field }}" | jq length)" ))" != '0' ]];
+        if [[ "$(( "$(gh pr list ${OPTIONS} | jq length)" +
+                   "$(gh issue list ${OPTIONS} | jq length)" ))" != '0' ]];
         then
           exit 1
         fi
-      env:
-        GH_TOKEN: ${{ inputs.token }}
 
     - name: Setup Zig
       uses: goto-bus-stop/setup-zig@v2.2.0
@@ -41,21 +46,29 @@ runs:
         version: ${{ env.zig_version }}
 
     - name: Install apt packages
+      env:
+        PACKAGES: "${{ env.apt_packages }}"
       shell: ${{ env.shell }}
       run: |
-        sudo apt-get install -y ${{ env.apt_packages }}
+        sudo apt-get install -y ${PACKAGES}
 
     - name: Install pip packages
+      env:
+        PACKAGES: "${{ env.pip_packages }}"
       shell: ${{ env.shell }}
       run: |
-        pip3 install ${{ env.pip_packages }}
+        pip3 install ${PACKAGES}
 
     - name: Setup git user information
+      env:
+        BRANCH: "${{ env.bot_branch }}"
+        EMAIL: "${{ env.gh_bot_email }}"
+        NAME: "${{ env.gh_bot_name }}"
       shell: ${{ env.shell }}
       run: |
-        git config user.name "${{ env.gh_bot_name }}"
-        git config user.email "${{ env.gh_bot_email }}"
-        git checkout -b "${{ env.bot_branch }}"
+        git config user.name "${NAME}"
+        git config user.email "${EMAIL}"
+        git checkout -b "${BRANCH}"
 
     - name: Pull submodules
       shell: ${{ env.shell }}
@@ -64,40 +77,46 @@ runs:
 
     - name: Fetch
       id: fetch
+      env:
+        GH_TOKEN: "${{ inputs.token }}"
       shell: ${{ env.shell }}
       run: |
         zig build -Dfetch
-      env:
-        GH_TOKEN: ${{ inputs.token }}
 
     - name: Create Issue
-      if: ${{ failure() && steps.fetch.conclusion == 'failure' }}
+      if: failure() && steps.fetch.conclusion == 'failure'
+      env:
+        BODY: "${{ env.gh_bot_issue_body }}"
+        GH_TOKEN: "${{ inputs.token }}"
+        TITLE: "${{ env.gh_bot_issue_title }}"
       shell: ${{ env.shell }}
       run: |
-        gh issue create --title "${{ env.gh_bot_issue_title }}" --body "${{ env.gh_bot_issue_body }}" --assignee "${GITHUB_REPOSITORY_OWNER}"
-      env:
-        GH_TOKEN: ${{ inputs.token }}
+        gh issue create --title "${TITLE}" --body "${BODY}" --assignee "${GITHUB_REPOSITORY_OWNER}"
 
     - name: Diff
-      if: ${{ steps.fetch.conclusion == 'success' }}
+      if: steps.fetch.conclusion == 'success'
       id: diff
       shell: ${{ env.shell }}
       run: |
-        printf 'len=%s\n' "$(git diff HEAD --name-only | wc -l)" >> "${GITHUB_OUTPUT}"
+        diffs="$(git diff HEAD --name-only | wc -l)"
+        printf 'len=%s\n' "${diffs}" >> "${GITHUB_OUTPUT}"
 
     - name: Update
-      if: ${{ steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0' }}
+      if: steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0'
       shell: ${{ env.shell }}
       run: |
         zig build -Dupdate
 
     - name: Create Pull Request
-      if: ${{ steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0' }}
+      if: steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0'
+      env:
+        BRANCH: "${{ env.bot_branch }}"
+        DEFAULT: "${{ env.default_branch }}"
+        GH_TOKEN: "${{ inputs.token }}"
+        TITLE: "${{ env.gh_bot_pr_title }}"
       shell: ${{ env.shell }}
       run: |
         git add -A
-        git commit -m "Bot: ${{ env.gh_bot_pr_title }}"
-        git push --force --set-upstream origin "${{ env.bot_branch }}"
-        gh pr create --base "${{ env.default_branch }}" --fill --reviewer "${GITHUB_REPOSITORY_OWNER}"
-      env:
-        GH_TOKEN: ${{ inputs.token }}
+        git commit -m "Bot: ${TITLE}"
+        git push --force --set-upstream origin "${BRANCH}"
+        gh pr create --base "${DEFAULT}" --fill --reviewer "${GITHUB_REPOSITORY_OWNER}"
