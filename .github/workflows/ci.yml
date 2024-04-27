@@ -28,6 +28,6 @@ jobs:
       with:
         repository: "${{ github.repository_owner }}/${{ matrix.repo }}.zig"
 
-    - uses: tiawl/spaceporn-dep-action-bot@ci
+    - uses: tiawl/spaceporn-dep-action-bot@bot
       with:
         token: "${{ github.token }}"
