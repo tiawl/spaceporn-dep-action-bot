@@ -29,5 +29,11 @@ jobs:
         repository: "${{ github.repository_owner }}/${{ matrix.repo }}.zig"
 
     - uses: tiawl/spaceporn-dep-action-bot@ci
+      if: github.ref_name == 'ci'
+      with:
+        token: "${{ github.token }}"
+
+    - uses: tiawl/spaceporn-dep-action-bot@bot
+      if: github.ref_name == 'bot'
       with:
         token: "${{ github.token }}"
