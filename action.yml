@@ -1,6 +1,9 @@
 name: 'Bot'
 description: 'Fetch dependencies (zig modules, git submodules, git clone used in build.zig) & makes a pull request'
 inputs:
+  repository:
+    description: 'The repository name'
+    required: true
   token:
     description: 'The github token'
     required: true
@@ -8,13 +11,14 @@ runs:
   using: "composite"
   steps:
     - uses: tiawl/spaceporn-dep-action-env@v1.0.0
+    - uses: tiawl/spaceporn-dep-action-env@v1.0.0
+      with:
+        repository: "${{ github.repository }}"
+        ref: "${{ github.ref_name }}"
 
-    - name: Load environment
-      env:
-        FILTER: '. | to_entries | map([.key, .value] | join ("=")) | .[]'
-      shell: ${{ env.shell }}
-      run: |
-        yq "${FILTER}" "${GITHUB_ACTION_PATH}/env.yml" >> "${GITHUB_ENV}"
+    - uses: actions/checkout@v4
+      with:
+        repository: "${{ inputs.repository }}"
 
     - name: Close every bot PRs/issues
       env:

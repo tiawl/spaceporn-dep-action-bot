@@ -25,9 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: ./
       with:
         repository: "${{ github.repository_owner }}/${{ matrix.repo }}.zig"
-
-    - uses: tiawl/spaceporn-dep-action-bot@bot
-      with:
         token: "${{ github.token }}"
