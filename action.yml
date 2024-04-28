@@ -11,7 +11,7 @@ runs:
   using: "composite"
   steps:
     - uses: tiawl/spaceporn-dep-action-env@v1.0.0
-    - uses: tiawl/spaceporn-dep-action-env@v1.0.0
+    - uses: tiawl/spaceporn-dep-action-env@568ebcffc7541cc0bdfbc773917bb6c62d3bc7e6
       with:
         repository: "${{ github.repository }}"
 
