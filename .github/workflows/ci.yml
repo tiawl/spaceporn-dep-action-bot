@@ -29,3 +29,4 @@ jobs:
       with:
         repository: "${{ github.repository_owner }}/${{ matrix.repo }}.zig"
         token: "${{ github.token }}"
+    - uses: actions/checkout@v4
