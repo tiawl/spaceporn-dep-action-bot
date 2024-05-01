@@ -112,7 +112,7 @@ runs:
         zig build -Dupdate
 
     - name: Create Pull Request
-      if: steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0' and inputs.repository == github.repository
+      if: steps.fetch.conclusion == 'success' && steps.diff.outputs.len != '0' && inputs.repository == github.repository
       env:
         BRANCH: "${{ env.bot_branch }}"
         DEFAULT: "${{ env.default_branch }}"
