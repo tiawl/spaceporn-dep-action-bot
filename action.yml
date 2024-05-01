@@ -70,8 +70,8 @@ runs:
         NAME: "${{ env.gh_bot_name }}"
       shell: ${{ env.shell }}
       run: |
-        git config user.name "${NAME}"
-        git config user.email "${EMAIL}"
+        #git config user.name "${NAME}"
+        #git config user.email "${EMAIL}"
         git checkout -b "${BRANCH}"
 
     - name: Pull submodules
