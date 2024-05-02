@@ -2,9 +2,9 @@
 
 A composite action triggered on daily CRON. It monitors extern and intern repositories of the [tiawl/spaceporn][1] dependencies chain.
 
-## Disclaimer
+## Important note
 
-This package is not intented to be used outside of the [tiawl/spaceporn][1] dependencies chain. For this reason, there are no contributing file/rules on this repository. However feel free to open an issue if you have a question. We will be happy to answer.
+This composite action is not intented to be used outside of the [tiawl/spaceporn][1] dependencies chain. For this reason, there are no contributing file/rules on this repository. However feel free to open an issue if you have a question. We will be happy to answer.
 
 ## CICD reminder
 
