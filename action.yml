@@ -10,8 +10,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: tiawl/spaceporn-action-env@v1.0.0
-    - uses: tiawl/spaceporn-action-env@v1.0.0
+    - uses: tiawl/spaceporn-action-env@1.0.1
+    - uses: tiawl/spaceporn-action-env@1.0.1
       with:
         repository: "${{ github.repository }}"
         path: "${{ github.action_path }}"
