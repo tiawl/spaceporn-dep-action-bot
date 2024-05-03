@@ -81,8 +81,6 @@ runs:
 
     - name: Fetch
       id: fetch
-      env:
-        GH_TOKEN: "${{ inputs.token }}"
       shell: ${{ env.shell }}
       run: |
         zig build -Dfetch
