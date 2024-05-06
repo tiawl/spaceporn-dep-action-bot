@@ -1,5 +1,5 @@
 name: 'Bot'
-description: 'Fetch dependencies (zig modules, git submodules, git clone used in build.zig) & makes a pull request'
+description: 'Fetch dependencies (zig modules & git clone used in build.zig) & makes a pull request'
 inputs:
   repository:
     description: 'The repository name'
@@ -73,11 +73,6 @@ runs:
         git config user.name "${NAME}"
         git config user.email "${EMAIL}"
         git checkout -b "${BRANCH}"
-
-    - name: Pull submodules
-      shell: ${{ env.shell }}
-      run: |
-        git submodule update --init --recursive
 
     - name: Fetch
       id: fetch
