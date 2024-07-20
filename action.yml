@@ -20,7 +20,7 @@ runs:
       with:
         repository: "${{ inputs.repository }}"
 
-    - name: Close every bot PRs/issues
+    - name: Close every bot PRs
       env:
         OPTIONS: "--author '@me' --state open --json \"${{ env.gh_field }}\""
         COMMENT: "--comment '${{ env.gh_bot_close_comment }}'"
@@ -30,19 +30,9 @@ runs:
       run: |
         declare -a pr_list=( $(gh pr list ${OPTIONS} | jq "${FILTER}") )
         for pr_nr in ${pr_list[@]}
-        do
-          gh pr close "${pr_nr}" ${COMMENT} --delete-branch
-        done
-        declare -a issue_list=( $(gh issue list ${OPTIONS} | jq "${FILTER}") )
-        for issue_nr in ${issue_list[@]}
-        do
-          gh issue close "${issue_nr}" ${COMMENT}
-        done
-        if [[ "$(( "$(gh pr list ${OPTIONS} | jq length)" +
-                   "$(gh issue list ${OPTIONS} | jq length)" ))" != '0' ]];
-        then
-          exit 1
-        fi
+        do gh pr close "${pr_nr}" ${COMMENT} --delete-branch; done
+        if [[ "$(gh pr list ${OPTIONS} | jq length)" != '0' ]]
+        then exit 1; fi
 
     - name: Setup Zig
       uses: goto-bus-stop/setup-zig@v2.2.0
@@ -79,16 +69,6 @@ runs:
       shell: ${{ env.shell }}
       run: |
         zig build -Dfetch
-
-    - name: Create Issue
-      if: failure() && steps.fetch.conclusion == 'failure'
-      env:
-        BODY: "${{ env.gh_bot_issue_body }}"
-        GH_TOKEN: "${{ inputs.token }}"
-        TITLE: "${{ env.gh_bot_issue_title }}"
-      shell: ${{ env.shell }}
-      run: |
-        gh issue create --title "${TITLE}" --body "${BODY}" --assignee "${GITHUB_REPOSITORY_OWNER}"
 
     - name: Diff
       if: steps.fetch.conclusion == 'success'
