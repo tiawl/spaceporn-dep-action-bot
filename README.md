@@ -23,6 +23,10 @@ This repository is automatically updated when a new release is available from th
 * [tiawl/spaceporn-action-cd-ping][11]
 * [tiawl/spaceporn-action-cd-pong][12]
 
+## License
+
+This repository is dedicated to the public domain. See the LICENSE file for more details.
+
 [1]:https://github.com/tiawl/spaceporn
 [2]:https://github.com/tiawl/vulkan.zig
 [3]:https://github.com/tiawl/wayland.zig
