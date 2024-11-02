@@ -20,6 +20,8 @@ jobs:
           - spirv.zig
           - glslang.zig
           - shaderc.zig
+          - oniguruma.zig
+          - libjq.zig
     runs-on: ubuntu-latest
     steps:
     - uses: tiawl/spaceporn-action-cd-ping@v1.1.0
